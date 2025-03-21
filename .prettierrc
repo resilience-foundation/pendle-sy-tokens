@@ -1,0 +1,41 @@
+{
+    "plugins": [
+        "prettier-plugin-solidity",
+        "@trivago/prettier-plugin-sort-imports"
+    ],
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "tabWidth": 4,
+    "useTabs": false,
+    "importOrderSeparation": true,
+    "importOrder": [
+        "^(./)[^.]*$",
+        "^(../)[^.]*$",
+        "^(../../)[^.]*$",
+        "^[./]",
+        "<THIRD_PARTY_MODULES>"
+    ],
+    "overrides": [
+        {
+            "files": "*.ts",
+            "options": {
+                "printWidth": 120
+            }
+        },
+        {
+            "files": "*.sol",
+            "options": {
+                "parser": "solidity-parse",
+                "printWidth": 120,
+                "singleQuote": false,
+                "compiler": "0.8.28"
+            }
+        },
+        {
+            "files": ["*.yml", "*.yaml"],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}
