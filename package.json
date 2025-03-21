@@ -1,0 +1,8 @@
+{
+  "name": "pendle-sy-tests",
+  "packageManager": "yarn@4.7.0",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.5.0",
+    "@openzeppelin/contracts-upgradeable": "^4.5.0"
+  }
+}

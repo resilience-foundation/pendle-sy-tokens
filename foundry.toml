@@ -1,6 +1,20 @@
 [profile.default]
 src = "src"
 out = "out"
-libs = ["lib"]
+test = "test"
+libs = ["node_modules", "lib"]
+solc = "0.8.28"
+evm_version = "cancun"
+via_ir = false
+optimizer = true
+optimizer_runs = 1000000
+remappings = [
+    "forge-std/=lib/forge-std/src/",
+    "pendle-sy/=lib/pendle-sy/contracts/",
+    "@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/",
+    "@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/",
+]
+ast = false
+show_progress = true
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
