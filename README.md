@@ -1,10 +1,14 @@
-# Pendle Standardized Yield (SY) Token tests
+# Pendle Standardized Yield (SY) Tokens for reUSD and reUSDe
 
 ## Introduction
 
-This repo aims to provide a standard for testing with Pendle's SY tokens, implemented in [Foundry framework](https://book.getfoundry.sh/).
+This repository contains Pendle Standardized Yield (SY) token implementations for two yield-bearing stablecoins:
+- **reUSD** (0x5086bf358635B81D8C47C66d1C8b9E567Db70c72)
+- **reUSDe** (0xdDC0f880ff6e4e22E4B74632fBb43Ce4DF6cCC5a)
 
-While the provided testcases give a decent overview on your SY token's functionality, passing them does not guarantee your implementation's security. Please always have your code audited by professional security researchers or reviewed by Pendle team otherwise.
+These SY wrappers enable reUSD and reUSDe tokens to be integrated with Pendle's yield trading protocol, allowing users to split their yield-bearing assets into Principal Tokens (PT) and Yield Tokens (YT).
+
+The implementations use Pendle's `PendleERC20SYUpg` base contract, providing a simple 1:1 wrapper with upgradeable proxy pattern support.
 
 ## Getting started
 
@@ -19,25 +23,37 @@ yarn install
 forge install
 ```
 
-## Writing your implementation
+### 3. Configure RPC URL
 
-### 1. Writing adapters
+Copy the example environment file and add your Ethereum mainnet RPC URL:
 
-Pendle provides a feature to [quickly launch your SY token/market](https://app.pendle.finance/listing) if your yield bearing asset is in one of the three popular standards:
+```bash
+cp .env.example .env
+```
 
-- ERC20
-- ERC4626
-- ERC4626 not redeemable to asset
+Edit `.env` and set your `ETH_RPC_URL`. You can get a free RPC URL from providers like [Alchemy](https://www.alchemy.com/), [Infura](https://infura.io/), or [Ankr](https://www.ankr.com/).
 
-In addition to this, we also have a feature called **_adapter_** which allows you to add more input/output tokens to your SY wrapper. Say if your stablecoin is mintable from `USDC/USDT`, your liquid restaking Bitcoin is mintable from `WBTC`, you can implement an adapter to help users utilize this minting route.
+## Contract Overview
 
-An example for adapter is available in `test/sy/adapters/PendleUSDSAdapter.sol` where we launch an ERC20 wrapper for `USDS` with minting available from `DAI`. Please refer to the [Pendle Adapter documentation](https://github.com/pendle-finance/pendle-sy/blob/main/contracts/interfaces/IStandardizedYieldAdapter.sol) for better understanding of the interface.
+### Main Contracts
 
-Once you have implemented your adapter, running test is as short as 10 LOCs. Please check the example [here](./test/sy/usds.t.sol).
+The repository includes two SY token implementations:
 
-### 2. Writing your own SY
+1. **PendleREUSDSY** (`src/PendleREUSDSY.sol`)
+   - Wraps reUSD token
+   - Contract address: 0x5086bf358635B81D8C47C66d1C8b9E567Db70c72
+   - Symbol: SY-reUSD
 
-If your yield bearing asset is not in the above three standards, you can implement your own SY token. Please refer to examples in [our public sy repository](https://github.com/pendle-finance/Pendle-SY-Public).
+2. **PendleREUSDESY** (`src/PendleREUSDESY.sol`)
+   - Wraps reUSDe token
+   - Contract address: 0xdDC0f880ff6e4e22E4B74632fBb43Ce4DF6cCC5a
+   - Symbol: SY-reUSDe
+
+Both contracts inherit from `PendleERC20SYUpg` which provides:
+- 1:1 exchange rate with the underlying token
+- Standard deposit/redeem functionality
+- Upgradeable proxy pattern support
+- ERC20 compliance
 
 ## Run the tests
 
@@ -62,3 +78,9 @@ For your own safety, we recommend you to move the tested implementation to your 
 ```bash
 forge flatten [YOUR_IMPLEMENTATION_PATH] > flattened_contracts/[YOUR_CONTRACT_NAME].sol
 ```
+
+## Links
+
+- [Re Protocol Documentation](https://docs.re.xyz/)
+- [Pendle Finance](https://pendle.finance)
+- [Pendle Documentation](https://docs.pendle.finance/Developers/Overview)
