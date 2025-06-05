@@ -49,7 +49,7 @@ contract PendleREUSDSYTest is SYTest {
         assertGt(rate, 0);
         
         uint256 oracleRate = IPExchangeRateOracle(REUSD_ORACLE).getExchangeRate();
-        assertEq(rate, oracleRate);
+        assertEq(rate, oracleRate / 1e12); // Scaled for USDC 6 decimals
     }
     
     function test_assetInfo() public {
@@ -129,14 +129,14 @@ contract PendleREUSDSYTest is SYTest {
         uint256 rate = sy.exchangeRate();
         uint256 syAmount = 1e18;
         
-        // At block 22583896, rate should be exactly 1001046076164383616
-        assertEq(rate, 1001046076164383616);
+        // At block 22583896, rate should be scaled for USDC 6 decimals
+        assertEq(rate, 1001046); // 1001046076164383616 / 1e12
         
         // Calculate USDC value (accounting for 6 decimals)
         uint256 usdcValue = (syAmount * rate) / 1e18;
         
-        // Should be exactly 1001046076164383616 (≈ 1.001046 USDC in 18 decimals)
-        assertEq(usdcValue, 1001046076164383616);
+        // Should be exactly 1001046 (≈ 1.001046 USDC in 6 decimals)
+        assertEq(usdcValue, 1001046);
     }
     
     function test_deposit_smallAmount() public {

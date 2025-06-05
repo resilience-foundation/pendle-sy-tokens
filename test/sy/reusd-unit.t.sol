@@ -42,8 +42,8 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         uint256 syAmount = 1e18;
         uint256 usdcValue = (syAmount * rate) / 1e18;
         
-        assertEq(rate, 1e18);
-        assertEq(usdcValue, 1e18); // Exactly 1:1
+        assertEq(rate, 1e6); // Scaled for USDC 6 decimals
+        assertEq(usdcValue, 1e6); // Exactly 1:1
     }
 
     function test_exactRate_onePointFive() public {
@@ -53,8 +53,8 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         uint256 syAmount = 1e18;
         uint256 usdcValue = (syAmount * rate) / 1e18;
         
-        assertEq(rate, 1.5e18);
-        assertEq(usdcValue, 1.5e18); // Exactly 50% premium
+        assertEq(rate, 1.5e6); // Scaled for USDC 6 decimals
+        assertEq(usdcValue, 1.5e6); // Exactly 50% premium
     }
 
     function test_exactRate_two() public {
@@ -64,8 +64,8 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         uint256 syAmount = 1e18;
         uint256 usdcValue = (syAmount * rate) / 1e18;
         
-        assertEq(rate, 2e18);
-        assertEq(usdcValue, 2e18); // Exactly 100% premium
+        assertEq(rate, 2e6); // Scaled for USDC 6 decimals
+        assertEq(usdcValue, 2e6); // Exactly 100% premium
     }
 
     function test_exactRate_extreme() public {
@@ -75,8 +75,8 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         uint256 syAmount = 1e18;
         uint256 usdcValue = (syAmount * rate) / 1e18;
         
-        assertEq(rate, 10e18);
-        assertEq(usdcValue, 10e18); // 10x value
+        assertEq(rate, 10e6); // Scaled for USDC 6 decimals
+        assertEq(usdcValue, 10e6); // 10x value
     }
 
     // ===== REAL TOKEN INTEGRATION TESTS =====
@@ -97,7 +97,7 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         
         // But the underlying value should be affected by exchange rate
         uint256 underlyingValue = (syReceived * sy.exchangeRate()) / 1e18;
-        assertEq(underlyingValue, amount * 1.5e18 / 1e18); // 1.5x the deposit
+        assertEq(underlyingValue, (amount * 15) / 10e12); // 1.5x scaled for USDC decimals
     }
 
     function test_redeem_withControlledRate() public {
@@ -120,7 +120,7 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         
         // But the underlying value represented is 2x due to exchange rate
         uint256 underlyingValue = (syAmount * sy.exchangeRate()) / 1e18;
-        assertEq(underlyingValue, depositAmount * 2);
+        assertEq(underlyingValue, depositAmount * 2 / 1e12); // 2x scaled for USDC decimals
     }
 
     function test_roundTrip_withDifferentRates() public {
@@ -145,9 +145,9 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
             // Should get back same amount regardless of exchange rate (ERC20SY)
             assertApproxEqAbs(tokenReceived, amount, 2); // Allow 2 wei rounding
             
-            // But underlying value should scale with rate
+            // But underlying value should scale with rate (scaled for USDC 6 decimals)
             uint256 underlyingValue = (syReceived * sy.exchangeRate()) / 1e18;
-            assertEq(underlyingValue, (amount * rates[i]) / 1e18);
+            assertEq(underlyingValue, (amount * rates[i]) / 1e30); // accounts for 1e12 scaling
         }
     }
 
@@ -164,9 +164,9 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         uint256 syAmount = deposit(user, reUSD, amount);
         
         // Verify initial state
-        assertEq(sy.exchangeRate(), 1e18);
+        assertEq(sy.exchangeRate(), 1e6); // Scaled for USDC 6 decimals
         uint256 initialValue = (syAmount * sy.exchangeRate()) / 1e18;
-        assertEq(initialValue, amount);
+        assertEq(initialValue, amount / 1e12); // USDC value with 6 decimals
         
         // Change rate to 2:1
         setMockRateToTwo();
@@ -174,7 +174,7 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         // SY balance should be same, but value should double
         assertEq(sy.balanceOf(user), syAmount);
         uint256 newValue = (syAmount * sy.exchangeRate()) / 1e18;
-        assertEq(newValue, amount * 2);
+        assertEq(newValue, amount * 2 / 1e12); // 2x scaled for USDC decimals
         
         // Redeem should still work correctly
         uint256 tokenReceived = redeem(user, reUSD, syAmount);
@@ -199,7 +199,7 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         
         // Value calculation should be precise
         uint256 underlyingValue = (syReceived * sy.exchangeRate()) / 1e18;
-        uint256 expectedValue = (smallAmount * 1.5e18) / 1e18;
+        uint256 expectedValue = (smallAmount * 15) / 10e12; // 1.5x scaled for USDC decimals
         assertEq(underlyingValue, expectedValue);
     }
 
@@ -218,7 +218,7 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
         
         // Value calculation should be precise even for large amounts
         uint256 underlyingValue = (syReceived * sy.exchangeRate()) / 1e18;
-        uint256 expectedValue = (largeAmount * 1.5e18) / 1e18;
+        uint256 expectedValue = (largeAmount * 15) / 10e12; // 1.5x scaled for USDC
         assertEq(underlyingValue, expectedValue);
     }
 
@@ -246,7 +246,7 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
             
             // Value should scale linearly with exchange rate
             uint256 underlyingValue = (syReceived * sy.exchangeRate()) / 1e18;
-            assertEq(underlyingValue, amounts[i] * 2); // 2x due to rate
+            assertEq(underlyingValue, amounts[i] * 2 / 1e12); // 2x scaled for USDC decimals
             
             // Clean up for next iteration
             redeem(user, reUSD, syReceived);
@@ -279,10 +279,10 @@ contract PendleREUSDSYUnitTest is UnitSYTest {
     function test_oracleIntegration_mockBehavior() public {
         // Test that SY correctly reads from mock oracle
         setMockRateToOnePointFive();
-        assertEq(sy.exchangeRate(), 1.5e18);
+        assertEq(sy.exchangeRate(), 1.5e6);
         
         setMockRateToTwo();
-        assertEq(sy.exchangeRate(), 2e18);
+        assertEq(sy.exchangeRate(), 2e6);
         
         // Test direct oracle access
         PendleREUSDSY syContract = PendleREUSDSY(payable(address(sy)));

@@ -26,7 +26,11 @@ contract PendleREUSDSY is PendleERC20SYUpg {
     /// @notice Returns the exchange rate between SY token and underlying asset
     /// @return Exchange rate scaled by 1e18 (1e18 = 1:1 ratio)
     function exchangeRate() public view virtual override returns (uint256) {
-        return IPExchangeRateOracle(exchangeRateOracle).getExchangeRate();
+        uint256 oracleRate = IPExchangeRateOracle(exchangeRateOracle).getExchangeRate();
+        // Adjust for decimal difference: SY has 18 decimals, USDC has 6 decimals
+        // Oracle returns rate assuming both tokens have 18 decimals (~1.002e18)
+        // But USDC only has 6 decimals, so we need to scale down by 1e12
+        return oracleRate / 1e12;
     }
     
     /// @notice Updates the exchange rate oracle address

@@ -26,6 +26,7 @@ contract PendleREUSDESY is PendleERC20SYUpg {
     /// @notice Returns the exchange rate between SY token and underlying asset
     /// @return Exchange rate scaled by 1e18 (1e18 = 1:1 ratio)
     function exchangeRate() public view virtual override returns (uint256) {
+        // No decimal adjustment needed: both SY and USDe have 18 decimals
         return IPExchangeRateOracle(exchangeRateOracle).getExchangeRate();
     }
     
